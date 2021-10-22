@@ -11,7 +11,7 @@ static class BuildCommand
         string[] args = Environment.GetCommandLineArgs();
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i].Contain(name))
+            if (args[i].Contains(name))
             {
                 return args[i + 1];
             }
