@@ -1,0 +1,69 @@
+sudo: required
+language: bash
+env:
+  global:
+  - IMAGE_NAME=gableroux/unity3d:2018.2.6f1
+  - BUILD_NAME="UltraStar Play"
+  - UNITYCI_PROJECT_NAME="UltraStar Play"
+  
+services:
+- docker
+  
+# only run builds on pushes to the master branch
+branches:
+  only:
+  - master
+
+# send email notifications when the build changes from succeeding to broken
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+
+before_install:
+  - chmod +x ./tools/travis/docker_test.sh
+  - chmod +x ./tools/travis/docker_build.sh
+  - chmod +x ./tools/travis/build.sh
+  - chmod +x ./tools/travis/before_script.sh
+  - chmod +x ./tools/travis/test.sh
+  - export UNITY_LICENSE_CONTENT=`cat tools/travis/activat.ion`
+  - rm tools/travis/activat.ion
+  - docker pull $IMAGE_NAME
+
+jobs:
+  include:
+  - stage: test
+    script: "./tools/travis/docker_test.sh"
+    env: TEST_PLATFORM=editmode
+    addons:
+      artifacts:
+        target_paths:
+        - "$(pwd)/$TEST_PLATFORM-results.xml"
+  - stage: test
+    script: "./tools/travis/docker_test.sh"
+    env: TEST_PLATFORM=playmode
+    addons:
+      artifacts:
+        target_paths:
+        - "$(pwd)/$TEST_PLATFORM-results.xml"
+#  - stage: build
+#    env: BUILD_TARGET=StandaloneLinux64
+#    script: "./tools/travis/docker_build.sh"
+#    addons:
+#      artifacts:
+#        target_paths:
+#        - "./Builds/"
+#  - stage: build
+#    env: BUILD_TARGET=StandaloneOSX
+#    script: "./tools/travis/docker_build.sh"
+#    addons:
+#      artifacts:
+#        target_paths:
+#        - "./Builds/"
+  - stage: build
+    env: BUILD_TARGET=StandaloneWindows64
+    script: "./tools/travis/docker_build.sh"
+#    addons:
+#      artifacts:
+#        target_paths:
+#        - "./Builds/"
